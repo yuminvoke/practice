@@ -10,3 +10,9 @@
 
 - 각 선택지의 끌리는 정도를 반영하여 양자택일을 수행하는 앱
 - <https://halmal.vercel.app>
+
+## ADK
+
+> Python
+
+- ADK 연습

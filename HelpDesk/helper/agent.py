@@ -7,7 +7,7 @@ def get_current_time(city: str) -> dict:
     return {"status": "success", "city": city, "time": "10:30 AM"}
 
 root_agent = Agent(
-    model=LiteLlm(model="ollama_chat/qwen3:4b"),
+    model=LiteLlm(model="ollama_chat/gemma3:1b"),
     name='root_agent',
     description='A helpful assistant for user questions.',
     instruction=(

@@ -4,6 +4,7 @@ __MACOSX/
 .AppleDouble
 .LSOverride
 Icon[]
+.env
 
 # Visual Studio code General
 .vscode/*

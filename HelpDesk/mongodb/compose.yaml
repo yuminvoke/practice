@@ -1,0 +1,21 @@
+services:
+  mongodb:
+    container_name: helper
+    image: mongodb/mongodb-atlas-local
+    hostname: mongodb
+    env_file:
+      - ../.env
+    environment:
+      - MONGODB_INITDB_ROOT_USERNAME=${DB_USER}
+      - MONGODB_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
+    ports:
+      - 27017:27017
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+      - db:/data/db
+      - configdb:/data/configdb
+      - mongot:/data/mongot
+volumes:
+  db:
+  configdb:
+  mongot:

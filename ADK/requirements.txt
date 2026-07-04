@@ -1,1 +1,0 @@
-google-adk[extensions]==2.3.0

@@ -28,6 +28,3 @@ __pycache__/
 
 # SQLite
 *.db
-
-# AI Agent
-AGENTS.md

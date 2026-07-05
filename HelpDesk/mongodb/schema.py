@@ -30,7 +30,6 @@ class Message(BaseModel):
 
 class ChatSession(BaseModel):
     session_id: str
-    user_id: str = None
     category: CategoryEnum
     messages: list[Message]
     ticket_id: str = None

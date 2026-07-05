@@ -26,7 +26,7 @@ flowchart TD
     50 -->|없음| 130["ChatSession 가져오기<br/>(session_id)"]:::mongodb
     130 --> 140["message 추가<br/>(session_id, category, messages={role='tool', content})"]:::mongodb
     140 --> 150["ChatSession 저장"]:::mongodb
-    150 --> 160["티켓 생성 도구 호출<br/>(session_id, user_id, category, question)"]:::agent
+    150 --> 160["티켓 생성 도구 호출<br/>(session_id, category, question)"]:::agent
     160 --> 170["티켓 생성<br/>ticket_id='ex'"]:::agent
     170 --> 180["ChatSession 가져오기<br/>(session_id)"]:::mongodb
     180 --> 190["message 추가<br/>(session_id, category, messages={role='agent', content})"]:::mongodb

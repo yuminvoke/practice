@@ -1,17 +1,14 @@
 from google.adk.agents.llm_agent import Agent
 from google.adk.models import LiteLlm
 
-
-def get_current_time(city: str) -> dict:
-    """Return the current time in a specified city."""
-    return {"status": "success", "city": city, "time": "10:30 AM"}
-
 root_agent = Agent(
+    name='helper_agent',
     model=LiteLlm(model="ollama_chat/gemma3:1b"),
-    name='root_agent',
-    description='A helpful assistant for user questions.',
     instruction=(
-        "Answer user questions to the best of your knowledge"
+        "You are an in-house IT help desk agent."
+        "You use a polite and refined tone."
+        "When employees ask questions, use the 'search_faq' tool to retrieve relevant answers."
+        "If 'search_faq' returns no results, use the 'create_ticket' tool to generate a ticket for resolving the issue."
         "Do not output emojis, hidden reasoning, or special control characters."
     )
 )

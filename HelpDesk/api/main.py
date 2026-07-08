@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import FastAPI
 from google.adk import Runner
 from google.adk.sessions import InMemorySessionService
@@ -5,7 +7,7 @@ from google.adk.sessions import InMemorySessionService
 from api.schema import ChatRequest, ChatResponse
 from helper.agent import root_agent
 from mongodb.client import client
-from mongodb.schema import ChatSession, Message
+from mongodb.schema import CategoryEnum, RoleEnum, ChatSession, Message
 
 APP_NAME = "IT Help Desk"
 
@@ -22,7 +24,7 @@ db = client["helper"]
 chat_sessions= db["chat_sessions"]
 
 
-def classify_category(question: str) -> str:
+def classify_category(question: str) -> CategoryEnum:
     rules = {
         "account": ["비밀번호", "계정", "로그인", "SSO", "권한"],
         "email": ["메일", "이메일", "수신", "발송", "첨부"],
@@ -36,23 +38,26 @@ def classify_category(question: str) -> str:
 
     for category, keywords in rules.items():
         if any(keyword.lower() in question.lower() for keyword in keywords):
-            return category
+            return CategoryEnum(category)
 
-    return "unknown"
+    return CategoryEnum.UNKNOWN
 
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse:
+    session_id = str(uuid.uuid4())
     category = classify_category(request.question)
 
     session = ChatSession(
-        session_id=request.session_id,
+        session_id=session_id,
         category=category,
         messages=[
-            Message(role="user", content=request.question)
+            Message(role=RoleEnum.USER, content=request.question)
         ],
     )
 
     await chat_sessions.insert_one(session.model_dump())
+
+    
 
     return ChatResponse()

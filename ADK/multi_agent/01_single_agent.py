@@ -77,7 +77,7 @@ async def init_session(app_name: str, user_id: str, session_id: str) -> None:
     )
 
 
-# Runner orchestrates the agnet execution loop
+# Runner orchestrates the agent execution loop
 runner = Runner(
     agent=weather_agent,  # The agent we want to run
     app_name=APP_NAME,  # Associates runs with our app

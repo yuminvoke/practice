@@ -3,6 +3,7 @@ import uuid
 from fastapi import FastAPI
 from google.adk import Runner
 from google.adk.sessions import InMemorySessionService
+from google.genai import types
 
 from api.schema import ChatRequest, ChatResponse
 from helper.agent import root_agent
@@ -24,39 +25,51 @@ db = client["helper"]
 chat_sessions= db["chat_sessions"]
 
 
-def classify_category(question: str) -> CategoryEnum:
-    rules = {
-        "account": ["비밀번호", "계정", "로그인", "SSO", "권한"],
-        "email": ["메일", "이메일", "수신", "발송", "첨부"],
-        "network": ["와이파이", "Wi-Fi", "VPN", "인터넷", "네트워크"],
-        "hardware": ["노트북", "모니터", "키보드", "마우스", "전원"],
-        "software": ["프로그램", "소프트웨어", "설치", "오류", "마이크"],
-        "printer": ["프린터", "인쇄", "출력", "용지"],
-        "security": ["피싱", "백신", "악성코드", "바이러스", "보안"],
-        "access": ["공유 폴더", "접근", "파일 서버"],
-    }
-
-    for category, keywords in rules.items():
-        if any(keyword.lower() in question.lower() for keyword in keywords):
-            return CategoryEnum(category)
-
-    return CategoryEnum.UNKNOWN
-
-
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/chat")
 async def chat(request: ChatRequest) -> ChatResponse:
     session_id = str(uuid.uuid4())
-    category = classify_category(request.question)
 
     session = ChatSession(
         session_id=session_id,
-        category=category,
         messages=[
             Message(role=RoleEnum.USER, content=request.question)
         ],
     )
 
+    # Serialize the Pydantic model instance to dict
     await chat_sessions.insert_one(session.model_dump())
+
+    adk_session = await session_service.get_session(
+        app_name=APP_NAME,
+        user_id=session_id,
+        session_id=session_id,
+    )
+
+    if adk_session is None:
+        await session_service.create_session(
+            app_name=APP_NAME,
+            user_id=session_id,
+            session_id=session_id,
+        )
+
+    user_message = types.Content(
+        role="user",
+        parts=[types.Part.from_text(text=request.question)],
+    )
+
+    final_answer = ""
+
+    async for event in runner.run_async(
+        user_id=session_id,
+        session_id=session_id,
+        new_message=user_message,
+    ):
+        if event.is_final_response():
+            if event.content and event.content.parts:
+                final_answer = event.content.parts[0].text
+            elif event.actions and event.actions.escalate:
+                final_answer = f"Agent escalated: {event.content.parts[0].text}"
+
 
     
 

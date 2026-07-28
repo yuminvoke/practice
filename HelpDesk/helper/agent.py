@@ -1,6 +1,8 @@
 from google.adk.agents.llm_agent import Agent
 from google.adk.models import LiteLlm
 
+from helper.tool import search_faq, create_ticket
+
 root_agent = Agent(
     name='helper_agent',
     model=LiteLlm(model="ollama_chat/gemma3:1b"),
@@ -15,5 +17,6 @@ root_agent = Agent(
         "5. If no matching FAQ is found, call the 'create_ticket' tool.\n"
         "6. Return the final response in the required format.\n"
         "Do not output emojis, hidden reasoning, or special control characters."
-    )
+    ),
+    tools=[search_faq, create_ticket]
 )

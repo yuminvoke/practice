@@ -30,7 +30,7 @@ class Message(BaseModel):
 
 class ChatSession(BaseModel):
     session_id: str
-    category: CategoryEnum
+    category: CategoryEnum | None = None
     messages: list[Message]
     ticket_id: str = None
     created_at: datetime = Field(default_factory=datetime.now)

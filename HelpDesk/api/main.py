@@ -7,8 +7,7 @@ from google.genai import types
 
 from api.schema import ChatRequest, ChatResponse
 from helper.agent import root_agent
-from mongodb.client import client
-from mongodb.schema import CategoryEnum, RoleEnum, ChatSession, Message
+from mongodb.repository import insert_chat_session
 
 APP_NAME = "IT Help Desk"
 
@@ -21,23 +20,13 @@ runner = Runner(
     session_service=session_service,
 )
 
-db = client["helper"]
-chat_sessions= db["chat_sessions"]
-
 
 @app.post("/chat")
 async def chat(request: ChatRequest) -> ChatResponse:
     session_id = str(uuid.uuid4())
+    question = request.question
 
-    session = ChatSession(
-        session_id=session_id,
-        messages=[
-            Message(role=RoleEnum.USER, content=request.question)
-        ],
-    )
-
-    # Serialize the Pydantic model instance to dict
-    await chat_sessions.insert_one(session.model_dump())
+    await insert_chat_session(session_id, question)
 
     adk_session = await session_service.get_session(
         app_name=APP_NAME,
@@ -70,7 +59,8 @@ async def chat(request: ChatRequest) -> ChatResponse:
             elif event.actions and event.actions.escalate:
                 final_answer = f"Agent escalated: {event.content.parts[0].text}"
 
-
-    
-
-    return ChatResponse()
+    return ChatResponse(
+        session_id=session_id,
+        ticket_id=None,
+        answer=final_answer,
+    )

@@ -26,5 +26,16 @@ async def search_faq(category: str, keywords: list[str], tool_context: ToolConte
 
     return content
 
-def create_ticket(category: str, keywords: list[str], tool_context: ToolContext):
-    pass
+async def create_ticket(question: str, category: str, tool_context: ToolContext):
+    """
+    Create a ticket(.txt) containing the user's question to be forwarded to the IT team.
+
+    Args:
+        question (str): User's question to be used for ticket content
+        category (str): Category of user's question
+        tool_context (ToolContext): ToolContext object
+    """
+    ticket_id = tool_context.session.id
+
+    with open(f"{ticket_id}.txt", "w", encoding="utf-8") as f:
+        f.write(question)

@@ -32,13 +32,6 @@ class ChatSession(BaseModel):
     session_id: str
     category: CategoryEnum | None = None
     messages: list[Message]
-    ticket_id: str = None
+    ticket_id: str | None = None
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
-
-
-class FAQ(BaseModel):
-    category: str
-    question: str
-    answer: str
-    keywords: list[str] = Field(default_factory=list)

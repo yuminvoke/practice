@@ -1,6 +1,8 @@
+import uuid
+
 from google.adk.tools import ToolContext
 
-from mongodb.repository import find_faq_answer, update_chat_message
+from mongodb.repository import find_faq_answer, update_chat_message, update_ticket_id
 from mongodb.schema import RoleEnum
 
 
@@ -26,7 +28,7 @@ async def search_faq(category: str, keywords: list[str], tool_context: ToolConte
 
     return content
 
-async def create_ticket(question: str, category: str, tool_context: ToolContext):
+async def create_ticket(question: str, category: str, tool_context: ToolContext) -> str:
     """
     Create a ticket(.txt) containing the user's question to be forwarded to the IT team.
 
@@ -35,7 +37,18 @@ async def create_ticket(question: str, category: str, tool_context: ToolContext)
         category (str): Category of user's question
         tool_context (ToolContext): ToolContext object
     """
-    ticket_id = tool_context.session.id
+    ticket_id = str(uuid.uuid4())
+    ticket_path = f"{ticket_id}.txt"
 
-    with open(f"{ticket_id}.txt", "w", encoding="utf-8") as f:
-        f.write(question)
+    content = (
+        f"Ticket ID: {ticket_id}\n"
+        f"Category: {category}\n"
+        f"Question: {question}\n"
+    )
+
+    with open(ticket_path, "x", encoding="utf-8") as file:
+        file.write(content)
+
+    await update_ticket_id(tool_context.session.id, ticket_id)
+
+    return f"Ticket created successfully. Ticket ID: {ticket_id}"
